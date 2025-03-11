@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GermItalo - Impara il Tedesco</title>
+    <style>
+        :root {
+            --primary: #5D8CAE;
+            --secondary: #F3B562;
+            --accent: #F06060;
+            --light: #F9F7F3;
+            --dark: #2F4858;
+            --correct: #7FB069;
+            --wrong: #D64933;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--dark);
+            padding: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        nav button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            flex-grow: 1;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        nav button.active {
+            background-color: var(--secondary);
+            color: var(--dark);
+            border-radius: 4px;
+        }
+        
+        main {
+            padding: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .quiz-container {
+            display: none;
+        }
+        
+        .quiz-container.active {
+            display: block;
+        }
+        
+        #home {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        #home img {
+            max-width: 100%;
+            margin: 1rem 0;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s;
+            transform-style: preserve-3d;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        
+        .word {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .hint {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: var(--dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--dark);
+        }
+        
+        .btn-accent {
+            background-color: var(--accent);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .option {
+            background-color: white;
+            border: 2px solid var(--primary);
+            color: var(--dark);
+            padding: 0.8rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .option.correct {
+            background-color: var(--correct);
+            color: white;
+            border-color: var(--correct);
+        }
+        
+        .option.wrong {
+            background-color: var(--wrong);
+            color: white;
+            border-color: var(--wrong);
+        }
+        
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+            flex-grow: 1;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--secondary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .input-container {
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+        
+        .feedback {
+            margin-top: 1rem;
+            font-weight: bold;
+            min-height: 1.5rem;
+        }
+        
+        .feedback.correct {
+            color: var(--correct);
+        }
+        
+        .feedback.wrong {
+            color: var(--wrong);
+        }
+        
+        .typing-container {
+            width: 100%;
+        }
+        
+        .result {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .result h2 {
+            margin-bottom: 1rem;
+        }
+        
+        .score {
+            font-size: 2rem;
+            color: var(--primary);
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 1rem 0;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .search-container {
+            margin-bottom: 1rem;
+        }
+        
+        .word-list {
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .word-item {
+            padding: 0.8rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .word-item:last-child {
+            border-bottom: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading:after {
+            content: ".";
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: "."; }
+            40% { content: ".."; }
+            60% { content: "..."; }
+            80%, 100% { content: ""; }
+        }
+        
+        @media (max-width: 480px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>GermItalo</h1>
+        <p>Impara le 1000 parole tedesche più utilizzate</p>
+    </header>
+    
+    <nav>
+        <button id="home-btn" class="active">Home</button>
+        <button id="flashcards-btn">Flashcards</button>
+        <button id="multiple-choice-btn">Quiz</button>
+        <button id="typing-btn">Scrittura</button>
+        <button id="matching-btn">Matching</button>
+    </nav>
+    
+    <main>
+        <div id="home" class="quiz-container active">
+            <h2>Benvenuto su GermItalo!</h2>
+            <p>Usa questa app per imparare le 1000 parole tedesche più utilizzate con l'aiuto di diversi quiz interattivi.</p>
+            <p>Scegli un quiz dalla barra di navigazione per iniziare:</p>
+            
+            <div class="card">
+                <div class="word">4 Tipi di Quiz</div>
+                <div class="options" style="margin-top: 1rem;">
+                    <button class="option" onclick="activateTab('flashcards-btn')">
+                        <strong>Flashcards</strong><br>
+                        Gira le carte per vedere le traduzioni
+                    </button>
+                    <button class="option" onclick="activateTab('multiple-choice-btn')">
+                        <strong>Quiz a scelta multipla</strong><br>
+                        Scegli la traduzione corretta
+                    </button>
+                    <button class="option" onclick="activateTab('typing-btn')">
+                        <strong>Scrittura</strong><br>
+                        Scrivi la traduzione della parola
+                    </button>
+                    <button class="option" onclick="activateTab('matching-btn')">
+                        <strong>Matching</strong><br>
+                        Abbina le parole alle traduzioni
+                    </button>
+                </div>
+            </div>
+            
+            <h3>Statistiche di apprendimento</h3>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" id="words-learned">0</div>
+                    <div>Parole apprese</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="total-correct">0</div>
+                    <div>Risposte corrette</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="accuracy">0%</div>
+                    <div>Precisione</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="flashcards" class="quiz-container">
+            <div class="progress">
+                <span id="flashcard-current">1</span>/<span id="flashcard-total">10</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="flashcard-progress"></div>
+                </div>
+            </div>
+            
+            <div class="card" id="flashcard">
+                <div class="card-face card-front">
+                    <div class="word" id="flashcard-word"></div>
+                    <div class="hint">Clicca per vedere la traduzione</div>
+                </div>
+                <div class="card-face card-back">
+                    <div class="word" id="flashcard-translation"></div>
+                    <div class="hint">Clicca per tornare alla parola</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between;">
+                <button class="btn" id="flashcard-prev">Precedente</button>
+                <button class="btn btn-secondary" id="flashcard-flip">Gira</button>
+                <button class="btn" id="flashcard-next">Successiva</button>
+            </div>
+        </div>
+        
+        <div id="multiple-choice" class="quiz-container">
+            <div class="progress">
+                <span id="mc-current">1</span>/<span id="mc-total">10</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="mc-progress"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="word" id="mc-word"></div>
+                <div class="hint">Scegli la traduzione corretta</div>
+                <div class="options" id="mc-options"></div>
+                <div class="feedback" id="mc-feedback"></div>
+            </div>
+            
+            <button class="btn" id="mc-next" style="width: 100%;">Successiva</button>
+        </div>
+        
+        <div id="typing" class="quiz-container">
+            <div class="progress">
+                <span id="typing-current">1</span>/<span id="typing-total">10</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="typing-progress"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="word" id="typing-word"></div>
+                <div class="hint">Scrivi la traduzione in italiano</div>
+                <div class="typing-container">
+                    <div class="input-container">
+                        <input type="text" id="typing-input" placeholder="Scrivi qui...">
+                    </div>
+                    <div class="feedback" id="typing-feedback"></div>
+                </div>
+            </div>
+            
+            <button class="btn" id="typing-check">Verifica</button>
+            <button class="btn" id="typing-next" style="display: none;">Successiva</button>
+        </div>
+        
+        <div id="matching" class="quiz-container">
+            <div class="progress">
+                <span id="matching-current">1</span>/<span id="matching-total">5</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="matching-progress"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="hint">Abbina le parole tedesche con le traduzioni italiane</div>
+                <div id="matching-container" style="width: 100%; margin-top: 1rem;"></div>
+                <div class="feedback" id="matching-feedback"></div>
+            </div>
+            
+            <button class="btn" id="matching-check">Verifica</button>
+            <button class="btn" id="matching-next" style="display: none;">Successiva</button>
+        </div>
+    </main>
+
+    <script>
+        // Dati delle parole tedesche e traduzioni italiane
+        let wordPairs = [];
+        const csvData = `deutsch,italiano
+der,il
+die,la
+und,e
+in,in
+den,il
+von,di
+zu,a
+das,il/lo
+mit,con
+sich,si`;
+        
+        // Funzione per caricare le parole dal CSV
+        function loadWords() {
+            // Parsing del CSV
+            const lines = csvData.trim().split('\n');
+            
+            // Salta l'intestazione
+            for (let i = 1; i < lines.length; i++) {
+                const [german, italian] = lines[i].split(',');
+                if (german && italian) {
+                    wordPairs.push({ german, italian });
+                }
+            }
+            
+            // Nella versione completa, caricherebbe tutte le 1000 parole dal file CSV
+            // Qui simuliamo il caricamento completo da un file esterno
+            fetch('german-italian-words')
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.trim().split('\n');
+                    wordPairs = [];
+                    
+                    // Salta l'intestazione
+                    for (let i = 1; i < lines.length; i++) {
+                        const [german, italian] = lines[i].split(',');
+                        if (german && italian) {
+                            wordPairs.push({ german, italian });
+                        }
+                    }
+                    
+                    // Inizializza tutti i quiz con le parole caricate
+                    initFlashcards();
+                    initMultipleChoice();
+                    initTyping();
+                    initMatching();
+                })
+                .catch(error => {
+                    console.error('Errore nel caricamento del file CSV:', error);
+                    // Inizializza con i dati predefiniti in caso di errore
+                    initFlashcards();
+                    initMultipleChoice();
+                    initTyping();
+                    initMatching();
+                });
+        }
+        
+        // Funzione per mescolare un array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Funzione per ottenere un sottoinsieme casuale di parole
+        function getRandomWords(count) {
+            const shuffled = shuffleArray([...wordPairs]);
+            return shuffled.slice(0, count);
+        }
+        
+        // Variabili per le statistiche
+        let stats = {
+            wordsLearned: 0,
+            totalCorrect: 0,
+            totalAttempts: 0
+        };
+        
+        // Carica le statistiche dal localStorage se disponibili
+        function loadStats() {
+            const savedStats = localStorage.getItem('germItaloStats');
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
+                updateStatsDisplay();
+            }
+        }
+        
+        // Salva le statistiche nel localStorage
+        function saveStats() {
+            localStorage.setItem('germItaloStats', JSON.stringify(stats));
+            updateStatsDisplay();
+        }
+        
+        // Aggiorna la visualizzazione delle statistiche
+        function updateStatsDisplay() {
+            document.getElementById('words-learned').textContent = stats.wordsLearned;
+            document.getElementById('total-correct').textContent = stats.totalCorrect;
+            document.getElementById('accuracy').textContent = 
+                stats.totalAttempts > 0 
+                    ? Math.round((stats.totalCorrect / stats.totalAttempts) * 100) + '%' 
+                    : '0%';
+        }
+        
+        // Variabili per i quiz
+        let flashcardsData = {
+            words: [],
+            currentIndex: 0
+        };
+        
+        let mcData = {
+            words: [],
+            options: [],
+            currentIndex: 0,
+            answered: false,
+            correctIndex: -1
+        };
+        
+        let typingData = {
+            words: [],
+            currentIndex: 0,
+            answered: false
+        };
+        
+        let matchingData = {
+            pairs: [],
+            currentRound: 0,
+            selections: {},
+            answered: false
+        };
+        
+        // Inizializza il quiz flashcards
+        function initFlashcards() {
+            flashcardsData.words = getRandomWords(10);
+            flashcardsData.currentIndex = 0;
+            updateFlashcard();
+        }
+        
+        // Aggiorna la flashcard corrente
+        function updateFlashcard() {
+            const current = flashcardsData.currentIndex;
+            const word = flashcardsData.words[current];
+            
+            document.getElementById('flashcard-word').textContent = word.german;
+            document.getElementById('flashcard-translation').textContent = word.italian;
+            document.getElementById('flashcard').classList.remove('flipped');
+            
+            document.getElementById('flashcard-current').textContent = current + 1;
+            document.getElementById('flashcard-total').textContent = flashcardsData.words.length;
+            document.getElementById('flashcard-progress').style.width = 
+                `${((current + 1) / flashcardsData.words.length) * 100}%`;
+            
+            // Gestisci la visibilità dei pulsanti precedente/successivo
+            document.getElementById('flashcard-prev').disabled = current === 0;
+            document.getElementById('flashcard-next').disabled = current === flashcardsData.words.length - 1;
+        }
+        
+        // Inizializza il quiz a scelta multipla
+        function initMultipleChoice() {
+            mcData.words = getRandomWords(10);
+            mcData.currentIndex = 0;
+            mcData.answered = false;
+            updateMultipleChoice();
+        }
+        
+        // Aggiorna la domanda a scelta multipla corrente
+        function updateMultipleChoice() {
+            const current = mcData.currentIndex;
+            const word = mcData.words[current];
+            
+            document.getElementById('mc-word').textContent = word.german;
+            document.getElementById('mc-current').textContent = current + 1;
+            document.getElementById('mc-total').textContent = mcData.words.length;
+            document.getElementById('mc-progress').style.width = 
+                `${((current + 1) / mcData.words.length) * 100}%`;
+            
+            document.getElementById('mc-feedback').textContent = '';
+            document.getElementById('mc-feedback').className = 'feedback';
+            
+            // Genera 4 opzioni (1 corretta + 3 errate)
+            const allWords = [...wordPairs];
+            const correctOption = word.italian;
+            const options = [correctOption];
+            
+            // Rimuovi la parola corrente da allWords per evitare duplicati
+            const filteredWords = allWords.filter(w => w.italian !== correctOption);
+            
+            // Aggiungi 3 opzioni casuali
+            const randomOptions = shuffleArray(filteredWords).slice(0, 3).map(w => w.italian);
+            options.push(...randomOptions);
+            
+            // Mescola le opzioni
+            mcData.options = shuffleArray(options);
+            mcData.correctIndex = mcData.options.indexOf(correctOption);
+            mcData.answered = false;
+            
+            // Aggiorna il DOM
+            const optionsContainer = document.getElementById('mc-options');
+            optionsContainer.innerHTML = '';
+            
+            mcData.options.forEach((option, index) => {
+                const optionBtn = document.createElement('button');
+                optionBtn.className = 'option';
+                optionBtn.textContent = option;
+                optionBtn.dataset.index = index;
+                optionBtn.addEventListener('click', () => selectMcOption(index));
+                optionsContainer.appendChild(optionBtn);
+            });
+            
+            document.getElementById('mc-next').style.display = 'none';
+        }
+        
+        // Gestisce la selezione di un'opzione nel quiz a scelta multipla
+        function selectMcOption(index) {
+            if (mcData.answered) return;
+            
+            mcData.answered = true;
+            const isCorrect = index === mcData.correctIndex;
+            
+            // Aggiorna le statistiche
+            stats.totalAttempts++;
+            if (isCorrect) {
+                stats.totalCorrect++;
+                stats.wordsLearned = Math.max(stats.wordsLearned, mcData.currentIndex + 1);
+            }
+            saveStats();
+            
+            // Mostra feedback
+            const options = document.querySelectorAll('#mc-options .option');
+            options.forEach((option, i) => {
+                if (i === mcData.correctIndex) {
+                    option.classList.add('correct');
+                } else if (i === index && !isCorrect) {
+                    option.classList.add('wrong');
+                }
+            });
+            
+            const feedback = document.getElementById('mc-feedback');
+            if (isCorrect) {
+                feedback.textContent = 'Corretto!';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = `Sbagliato! La risposta corretta è: ${mcData.options[mcData.correctIndex]}`;
+                feedback.className = 'feedback wrong';
+            }
+            
+            document.getElementById('mc-next').style.display = 'block';
+        }
+        
+        // Inizializza il quiz di digitazione
+        function initTyping() {
+            typingData.words = getRandomWords(10);
+            typingData.currentIndex = 0;
+            typingData.answered = false;
+            updateTyping();
+        }
+        
+        // Aggiorna la domanda di digitazione corrente
+        function updateTyping() {
+            const current = typingData.currentIndex;
+            const word = typingData.words[current];
+            
+            document.getElementById('typing-word').textContent = word.german;
+            document.getElementById('typing-current').textContent = current + 1;
+            document.getElementById('typing-total').textContent = typingData.words.length;
+            document.getElementById('typing-progress').style.width = 
+                `${((current + 1) / typingData.words.length) * 100}%`;
+            
+            document.getElementById('typing-input').value = '';
+            document.getElementById('typing-input').disabled = false;
+            document.getElementById('typing-feedback').textContent = '';
+            document.getElementById('typing-feedback').className = 'feedback';
+            typingData.answered = false;
+            
+            document.getElementById('typing-check').style.display = 'block';
+            document.getElementById('typing-next').style.display = 'none';
+            
+            // Focus sull'input
+            document.getElementById('typing-input').focus();
+        }
+        
+        // Verifica la risposta nel quiz di digitazione
+        function checkTypingAnswer() {
+            if (typingData.answered) return;
+            
+            const input = document.getElementById('typing-input').value.trim().toLowerCase();
+            const correctAnswer = typingData.words[typingData.currentIndex].italian.toLowerCase();
+            
+            typingData.answered = true;
+            const isCorrect = input === correctAnswer;
+            
+            // Aggiorna le statistiche
+            stats.totalAttempts++;
+            if (isCorrect) {
+                stats.totalCorrect++;
+                stats.wordsLearned = Math.max(stats.wordsLearned, typingData.currentIndex + 1);
+            }
+            saveStats();
+            
+            // Mostra feedback
+            const feedback = document.getElementById('typing-feedback');
+            document.getElementById('typing-input').disabled = true;
+            
+            if (isCorrect) {
+                feedback.textContent = 'Corretto!';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = `Sbagliato! La risposta corretta è: ${correctAnswer}`;
+                feedback.className = 'feedback wrong';
+            }
+            
+            document.getElementById('typing-check').style.display = 'none';
+            document.getElementById('typing-next').style.display = 'block';
+        }
+        
+        // Inizializza il quiz di abbinamento
+        function initMatching() {
+            matchingData.pairs = getRandomWords(5);
+            matchingData.currentRound = 0;
+            updateMatching();
+        }
+        
+        // Aggiorna il quiz di abbinamento corrente
+        function updateMatching() {
+            const container = document.getElementById('matching-container');
+            container.innerHTML = '';
+            
+            document.getElementById('matching-current').textContent = matchingData.currentRound + 1;
+            document.getElementById('matching-total').textContent = 5; // Fisso a 5 round
+            document.getElementById('matching-progress').style.width = 
+                `${((matchingData.currentRound + 1) / 5) * 100}%`;
+            
+            document.getElementById('matching-feedback').textContent = '';
+            document.getElementById('matching-feedback').className = 'feedback';
+            
+            // Creiamo due colonne: parole tedesche e traduzioni italiane
+            const germanWords = matchingData.pairs.map(pair => pair.german);
+            const italianWords = shuffleArray([...matchingData.pairs.map(pair => pair.italian)]);
+            
+            // Contenitore per le colonne
+            const columnContainer = document.createElement('div');
+            columnContainer.style.display = 'flex';
+            columnContainer.style.gap = '1rem';
+            columnContainer.style.width = '100%';
+            
+            // Colonna tedesca
+            const germanColumn = document.createElement('div');
+            germanColumn.style.flex = '1';
+            
+            // Colonna italiana
+            const italianColumn = document.createElement('div');
+            italianColumn.style.flex = '1';
+            
+            // Aggiungi le parole tedesche (fisse)
+            germanWords.forEach((word, index) => {
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word-item';
+                wordElement.textContent = word;
+                wordElement.style.marginBottom = '0.5rem';
+                wordElement.style.padding = '0.5rem';
+                wordElement.style.backgroundColor = '#f9f9f9';
+                wordElement.style.borderRadius = '5px';
+                germanColumn.appendChild(wordElement);
+            });
+            
+            // Aggiungi le traduzioni italiane (selezionabili)
+            matchingData.selections = {}; // Reset delle selezioni
+            
+            italianWords.forEach((word, index) => {
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word-item selectable';
+                wordElement.textContent = word;
+                wordElement.dataset.word = word;
+                wordElement.style.marginBottom = '0.5rem';
+                wordElement.style.padding = '0.5rem';
+                wordElement.style.backgroundColor = '#f9f9f9';
+                wordElement.style.borderRadius = '5px';
+                wordElement.style.cursor = 'pointer';
+                
+                wordElement.addEventListener('click', () => selectMatchingWord(index, word));
+                italianColumn.appendChild(wordElement);
+            });
+            
+            columnContainer.appendChild(germanColumn);
+            columnContainer.appendChild(italianColumn);
+            container.appendChild(columnContainer);
+            
+            matchingData.answered = false;
+            document.getElementById('matching-check').style.display = 'block';
+            document.getElementById('matching-next').style.display = 'none';
+        }
+        
+        // Gestisce la selezione di una parola nel quiz di abbinamento
+        function selectMatchingWord(index, word) {
+            if (matchingData.answered) return;
+            
+            const germanIndex = Object.keys(matchingData.selections).length;
+            if (germanIndex >= matchingData.pairs.length) return;
+            
+            // Seleziona la parola tedesca corrispondente in base all'ordine di selezione
+            const germanWord = matchingData.pairs[germanIndex].german;
+            
+            // Registra la selezione
+            matchingData.selections[germanWord] = word;
+            
+            // Effetto visivo di selezione
+            const italianElements = document.querySelectorAll('#matching-container .selectable');
+            italianElements[index].style.backgroundColor = 'var(--secondary)';
+            italianElements[index].style.color = 'var(--dark)';
+            italianElements[index].style.pointerEvents = 'none';
+            
+            // Effetto visivo sulla parola tedesca
+            const germanElements = document.querySelectorAll('#matching-container .word-item:not(.selectable)');
+            germanElements[germanIndex].style.backgroundColor = 'var(--secondary)';
+            germanElements[germanIndex].style.color = 'var(--dark)';
+            
+            // Se tutte le parole sono state selezionate, abilita il pulsante di verifica
+            if (Object.keys(matchingData.selections).length === matchingData.pairs.length) {
+                document.getElementById('matching-check').disabled = false;
+            }
+        }
+        
+        // Verifica le risposte nel quiz di abbinamento
+        function checkMatchingAnswers() {
+            if (matchingData.answered) return;
+            
+            matchingData.answered = true;
+            let correctCount = 0;
+            
+            // Verifica ogni abbinamento
+            Object.keys(matchingData.selections).forEach((germanWord, index) => {
+                const selectedItalian = matchingData.selections[germanWord];
+                const correctItalian = matchingData.pairs.find(pair => pair.german === germanWord).italian;
+                
+                if (selectedItalian === correctItalian) {
+                    correctCount++;
+                }
+            });
+            
+            // Aggiorna le statistiche
+            stats.totalAttempts += matchingData.pairs.length;
+            stats.totalCorrect += correctCount;
+            if (correctCount === matchingData.pairs.length) {
+                stats.wordsLearned = Math.max(stats.wordsLearned, 
+                    stats.wordsLearned + matchingData.currentRound + 1);
+            }
+            saveStats();
+            
+            // Mostra feedback
+            const feedback = document.getElementById('matching-feedback');
+            if (correctCount === matchingData.pairs.length) {
+                feedback.textContent = 'Tutti gli abbinamenti sono corretti!';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = `Hai indovinato ${correctCount} su ${matchingData.pairs.length} abbinamenti.`;
+                feedback.className = 'feedback wrong';
+            }
+            
+            document.getElementById('matching-check').style.display = 'none';
+            document.getElementById('matching-next').style.display = 'block';
+        }
+        
+        // Gestione del cambio di tab
+        function activateTab(tabId) {
+            // Rimuovi la classe active da tutti i pulsanti e contenitori
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.quiz-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            
+            // Aggiungi la classe active al pulsante e al contenitore selezionati
+            document.getElementById(tabId).classList.add('active');
+            
+            // Attiva il contenitore corrispondente
+            switch (tabId) {
+                case 'home-btn':
+                    document.getElementById('home').classList.add('active');
+                    break;
+                case 'flashcards-btn':
+                    document.getElementById('flashcards').classList.add('active');
+                    break;
+                case 'multiple-choice-btn':
+                    document.getElementById('multiple-choice').classList.add('active');
+                    break;
+                case 'typing-btn':
+                    document.getElementById('typing').classList.add('active');
+                    document.getElementById('typing-input').focus();
+                    break;
+                case 'matching-btn':
+                    document.getElementById('matching').classList.add('active');
+                    break;
+            }
+        }
+        
+        // Inizializzazione dell'app
+        function initApp() {
+            // Carica le parole
+            loadWords();
+            
+            // Carica le statistiche
+            loadStats();
+            
+            // Event listeners per i pulsanti di navigazione
+            document.getElementById('home-btn').addEventListener('click', () => activateTab('home-btn'));
+            document.getElementById('flashcards-btn').addEventListener('click', () => activateTab('flashcards-btn'));
+            document.getElementById('multiple-choice-btn').addEventListener('click', () => activateTab('multiple-choice-btn'));
+            document.getElementById('typing-btn').addEventListener('click', () => activateTab('typing-btn'));
+            document.getElementById('matching-btn').addEventListener('click', () => activateTab('matching-btn'));
+            
+            // Event listeners per flashcards
+            document.getElementById('flashcard').addEventListener('click', () => {
+                document.getElementById('flashcard').classList.toggle('flipped');
+            });
+            
+            document.getElementById('flashcard-flip').addEventListener('click', () => {
+                document.getElementById('flashcard').classList.toggle('flipped');
+            });
+            
+            document.getElementById('flashcard-prev').addEventListener('click', () => {
+                if (flashcardsData.currentIndex > 0) {
+                    flashcardsData.currentIndex--;
+                    updateFlashcard();
+                }
+            });
+            
+            document.getElementById('flashcard-next').addEventListener('click', () => {
+                if (flashcardsData.currentIndex < flashcardsData.words.length - 1) {
+                    flashcardsData.currentIndex++;
+                    updateFlashcard();
+                }
+            });
+            
+            // Event listeners per multiple choice
+            document.getElementById('mc-next').addEventListener('click', () => {
+                if (mcData.currentIndex < mcData.words.length - 1) {
+                    mcData.currentIndex++;
+                    updateMultipleChoice();
+                } else {
+                    // Quiz completato
+                    initMultipleChoice();
+                }
+            });
+            
+            // Event listeners per typing
+            document.getElementById('typing-check').addEventListener('click', checkTypingAnswer);
+            
+            document.getElementById('typing-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkTypingAnswer();
+                }
+            });
+            
+            document.getElementById('typing-next').addEventListener('click', () => {
+                if (typingData.currentIndex < typingData.words.length - 1) {
+                    typingData.currentIndex++;
+                    updateTyping();
+                } else {
+                    // Quiz completato
+                    initTyping();
+                }
+            });
+            
+            // Event listeners per matching
+            document.getElementById('matching-check').addEventListener('click', checkMatchingAnswers);
+            
+            document.getElementById('matching-next').addEventListener('click', () => {
+                matchingData.currentRound++;
+                if (matchingData.currentRound < 5) {
+                    matchingData.pairs = getRandomWords(5);
+                    updateMatching();
+                } else {
+                    // Quiz completato
+                    matchingData.currentRound = 0;
+                    initMatching();
+                }
+            });
+        }
+        
+        // Avvia l'app quando il documento è pronto
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
