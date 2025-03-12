@@ -424,7 +424,7 @@
 
   <script>
     // Dataset di parole
-    const words = [
+const words = [
   { tedesco: 'der', italiano: 'il' },
   { tedesco: 'die', italiano: 'la' },
   { tedesco: 'das', italiano: 'lo' },
@@ -1427,62 +1427,62 @@
   { tedesco: 'Pfanne', italiano: 'padella' },
   { tedesco: 'Trainer', italiano: 'allenatore' },
   { tedesco: 'Minute', italiano: 'minuto' }
-    ];
-    
-    // Variabili di stato globali
-    let quizType = null;
-    let currentWord = null;
-    let options = [];
-    let score = 0;
-    let total = 0;
-    let progress = 0;
-    let showNextButton = false;
-    let shuffledWords = [];
-    
-    // Elementi del DOM
-    const menuView = document.getElementById('menu-view');
-    const quizView = document.getElementById('quiz-view');
-    const quizTitle = document.getElementById('quiz-title');
-    const progressFill = document.getElementById('progress-fill');
-    const status = document.getElementById('status');
-    const flashcardQuiz = document.getElementById('flashcard-quiz');
-    const flashcard = document.getElementById('flashcard');
-    const frontWord = document.getElementById('front-word');
-    const backWord = document.getElementById('back-word');
-    const nextFlashcard = document.getElementById('next-flashcard');
-    const multipleChoiceQuiz = document.getElementById('multiple-choice-quiz');
-    const mcQuestion = document.getElementById('mc-question');
-    const mcOptions = document.getElementById('mc-options');
-    const nextMc = document.getElementById('next-mc');
-    const writingQuiz = document.getElementById('writing-quiz');
-    const writingQuestion = document.getElementById('writing-question');
-    const writingAnswer = document.getElementById('writing-answer');
-    const writingFeedback = document.getElementById('writing-feedback');
-    const checkAnswer = document.getElementById('check-answer');
-    const nextWriting = document.getElementById('next-writing');
-    const listeningQuiz = document.getElementById('listening-quiz');
-    const playWord = document.getElementById('play-word');
-    const listeningOptions = document.getElementById('listening-options');
-    const nextListening = document.getElementById('next-listening');
-    const summaryView = document.getElementById('summary-view');
-    const percentage = document.getElementById('percentage');
-    const resultText = document.getElementById('result-text');
-    const continueButton = document.getElementById('continue-button');
-    const menuButton = document.getElementById('menu-button');
-    const backToMenu = document.getElementById('back-to-menu');
-    const quizTypes = document.querySelectorAll('.quiz-type');
-    
-    // Funzioni utili
-    function shuffleArray(array) {
-      const newArray = [...array];
-      for (let i = newArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-      }
-      return newArray;
-    }
-    
-    function generateOptions(word) {
+];
+
+// Variabili di stato globali
+let quizType = null;
+let currentWord = null;
+let options = [];
+let score = 0;
+let total = 0;
+let progress = 0;
+let showNextButton = false;
+let shuffledWords = []; // Nuova variabile per parole mescolate
+
+// Elementi del DOM
+const menuView = document.getElementById('menu-view');
+const quizView = document.getElementById('quiz-view');
+const quizTitle = document.getElementById('quiz-title');
+const progressFill = document.getElementById('progress-fill');
+const status = document.getElementById('status');
+const flashcardQuiz = document.getElementById('flashcard-quiz');
+const flashcard = document.getElementById('flashcard');
+const frontWord = document.getElementById('front-word');
+const backWord = document.getElementById('back-word');
+const nextFlashcard = document.getElementById('next-flashcard');
+const multipleChoiceQuiz = document.getElementById('multiple-choice-quiz');
+const mcQuestion = document.getElementById('mc-question');
+const mcOptions = document.getElementById('mc-options');
+const nextMc = document.getElementById('next-mc');
+const writingQuiz = document.getElementById('writing-quiz');
+const writingQuestion = document.getElementById('writing-question');
+const writingAnswer = document.getElementById('writing-answer');
+const writingFeedback = document.getElementById('writing-feedback');
+const checkAnswer = document.getElementById('check-answer');
+const nextWriting = document.getElementById('next-writing');
+const listeningQuiz = document.getElementById('listening-quiz');
+const playWord = document.getElementById('play-word');
+const listeningOptions = document.getElementById('listening-options');
+const nextListening = document.getElementById('next-listening');
+const summaryView = document.getElementById('summary-view');
+const percentage = document.getElementById('percentage');
+const resultText = document.getElementById('result-text');
+const continueButton = document.getElementById('continue-button');
+const menuButton = document.getElementById('menu-button');
+const backToMenu = document.getElementById('back-to-menu');
+const quizTypes = document.querySelectorAll('.quiz-type');
+
+// Funzioni utili
+function shuffleArray(array) {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
+function generateOptions(word) {
   const options = [word.italiano];
   
   // Crea una copia dell'array di parole per selezionare opzioni casuali
@@ -1499,13 +1499,13 @@
   
   return shuffleArray(options);
 }
-    
-    function updateProgress() {
-      progressFill.style.width = `${(progress / 10) * 100}%`;
-      status.textContent = `Parola ${progress + 1} di 10 - Punteggio: ${score}/${total}`;
-    }
-    
-    function resetQuiz() {
+
+function updateProgress() {
+  progressFill.style.width = `${(progress / 10) * 100}%`;
+  status.textContent = `Parola ${progress + 1} di 10 - Punteggio: ${score}/${total}`;
+}
+
+function resetQuiz() {
   // Mescola tutte le parole all'inizio del quiz
   shuffledWords = shuffleArray([...words]);
   
@@ -1515,8 +1515,8 @@
   total = 0;
   progress = 0;
   showNextButton = false;
-      
-       // Aggiorna UI
+  
+  // Aggiorna UI
   updateProgress();
   flashcard.classList.remove('flipped');
   frontWord.textContent = currentWord.tedesco;
@@ -1531,15 +1531,15 @@
   nextMc.classList.add('hidden');
   nextWriting.classList.add('hidden');
   nextListening.classList.add('hidden');
-      
-      // Nascondi summary e mostra quiz appropriato
+  
+  // Nascondi summary e mostra quiz appropriato
   summaryView.classList.add('hidden');
   flashcardQuiz.classList.add('hidden');
   multipleChoiceQuiz.classList.add('hidden');
   writingQuiz.classList.add('hidden');
   listeningQuiz.classList.add('hidden');
-      
-      // Mostra il quiz corretto
+  
+  // Mostra il quiz corretto
   if (quizType === 'flashcard') {
     flashcardQuiz.classList.remove('hidden');
     quizTitle.textContent = 'Quiz Flashcard';
@@ -1555,8 +1555,7 @@
     renderListeningOptions();
   }
 }
-    
-    // Modifica la funzione nextWord per usare l'array mescolato
+
 function nextWord() {
   progress++;
   
@@ -1568,8 +1567,8 @@ function nextWord() {
   currentWord = shuffledWords[progress];
   options = generateOptions(currentWord);
   showNextButton = false;
-      
-     // Aggiorna UI
+  
+  // Aggiorna UI
   updateProgress();
   flashcard.classList.remove('flipped');
   frontWord.textContent = currentWord.tedesco;
@@ -1585,142 +1584,142 @@ function nextWord() {
   nextWriting.classList.add('hidden');
   nextListening.classList.add('hidden');
 }
-    
-    function renderMultipleChoiceOptions() {
-      mcOptions.innerHTML = '';
-      options.forEach(option => {
-        const button = document.createElement('button');
-        button.className = 'option';
-        button.textContent = option;
-        button.addEventListener('click', () => {
-          if (!showNextButton) {
-            handleOptionClick(option, button);
-          }
-        });
-        mcOptions.appendChild(button);
-      });
-    }
-    
-    function renderListeningOptions() {
-      listeningOptions.innerHTML = '';
-      options.forEach(option => {
-        const button = document.createElement('button');
-        button.className = 'option';
-        button.textContent = option;
-        button.addEventListener('click', () => {
-          if (!showNextButton) {
-            handleOptionClick(option, button);
-          }
-        });
-        listeningOptions.appendChild(button);
-      });
-    }
-    
-    function handleOptionClick(option, button) {
-      const isCorrect = option === currentWord.italiano;
-      total++;
-      
-      if (isCorrect) {
-        score++;
-        button.classList.add('correct');
-      } else {
-        button.classList.add('incorrect');
-        // Evidenzia la risposta corretta
-        const options = button.parentElement.querySelectorAll('.option');
-        options.forEach(opt => {
-          if (opt.textContent === currentWord.italiano) {
-            opt.classList.add('correct');
-          }
-        });
+
+function renderMultipleChoiceOptions() {
+  mcOptions.innerHTML = '';
+  options.forEach(option => {
+    const button = document.createElement('button');
+    button.className = 'option';
+    button.textContent = option;
+    button.addEventListener('click', () => {
+      if (!showNextButton) {
+        handleOptionClick(option, button);
       }
-      
-      showNextButton = true;
-      updateProgress();
-      
-      if (quizType === 'multiple-choice') {
-        nextMc.classList.remove('hidden');
-      } else if (quizType === 'listening') {
-        nextListening.classList.remove('hidden');
+    });
+    mcOptions.appendChild(button);
+  });
+}
+
+function renderListeningOptions() {
+  listeningOptions.innerHTML = '';
+  options.forEach(option => {
+    const button = document.createElement('button');
+    button.className = 'option';
+    button.textContent = option;
+    button.addEventListener('click', () => {
+      if (!showNextButton) {
+        handleOptionClick(option, button);
       }
-    }
-    
-    function showSummary() {
-      const percentageValue = Math.round((score / total) * 100) || 0;
-      
-      flashcardQuiz.classList.add('hidden');
-      multipleChoiceQuiz.classList.add('hidden');
-      writingQuiz.classList.add('hidden');
-      listeningQuiz.classList.add('hidden');
-      
-      percentage.textContent = `${percentageValue}%`;
-      resultText.textContent = `Hai risposto correttamente a ${score} domande su ${total}.`;
-      
-      summaryView.classList.remove('hidden');
-    }
-    
-    function playWordSound() {
-      // In una implementazione reale userebbe la sintesi vocale
-      alert(`La parola tedesca è: ${currentWord.tedesco}`);
-    }
-    
-    // Event Listeners
-    quizTypes.forEach(type => {
-      type.addEventListener('click', () => {
-        quizType = type.dataset.quizType;
-        menuView.classList.add('hidden');
-        quizView.classList.remove('hidden');
-        resetQuiz();
-      });
     });
-    
-    flashcard.addEventListener('click', () => {
-      flashcard.classList.toggle('flipped');
-    });
-    
-    nextFlashcard.addEventListener('click', nextWord);
-    nextMc.addEventListener('click', nextWord);
-    nextWriting.addEventListener('click', nextWord);
-    nextListening.addEventListener('click', nextWord);
-    
-    checkAnswer.addEventListener('click', () => {
-      const userAnswer = writingAnswer.value.toLowerCase().trim();
-      const correctAnswer = currentWord.tedesco.toLowerCase();
-      const isCorrect = userAnswer === correctAnswer;
-      
-      total++;
-      
-      if (isCorrect) {
-        score++;
-        writingFeedback.textContent = 'Corretto!';
-        writingFeedback.className = 'feedback correct';
-      } else {
-        writingFeedback.textContent = `Errato. La risposta corretta è "${currentWord.tedesco}".`;
-        writingFeedback.className = 'feedback incorrect';
+    listeningOptions.appendChild(button);
+  });
+}
+
+function handleOptionClick(option, button) {
+  const isCorrect = option === currentWord.italiano;
+  total++;
+  
+  if (isCorrect) {
+    score++;
+    button.classList.add('correct');
+  } else {
+    button.classList.add('incorrect');
+    // Evidenzia la risposta corretta
+    const options = button.parentElement.querySelectorAll('.option');
+    options.forEach(opt => {
+      if (opt.textContent === currentWord.italiano) {
+        opt.classList.add('correct');
       }
-      
-      writingFeedback.classList.remove('hidden');
-      writingAnswer.disabled = true;
-      checkAnswer.classList.add('hidden');
-      nextWriting.classList.remove('hidden');
-      showNextButton = true;
-      updateProgress();
     });
-    
-    playWord.addEventListener('click', playWordSound);
-    
-    continueButton.addEventListener('click', resetQuiz);
-    
-    menuButton.addEventListener('click', () => {
-      quizView.classList.add('hidden');
-      menuView.classList.remove('hidden');
-      quizType = null;
-    });
-    
-    backToMenu.addEventListener('click', () => {
-      quizView.classList.add('hidden');
-      menuView.classList.remove('hidden');
-      quizType = null;
-    });
+  }
+  
+  showNextButton = true;
+  updateProgress();
+  
+  if (quizType === 'multiple-choice') {
+    nextMc.classList.remove('hidden');
+  } else if (quizType === 'listening') {
+    nextListening.classList.remove('hidden');
+  }
+}
+
+function showSummary() {
+  const percentageValue = Math.round((score / total) * 100) || 0;
+  
+  flashcardQuiz.classList.add('hidden');
+  multipleChoiceQuiz.classList.add('hidden');
+  writingQuiz.classList.add('hidden');
+  listeningQuiz.classList.add('hidden');
+  
+  percentage.textContent = `${percentageValue}%`;
+  resultText.textContent = `Hai risposto correttamente a ${score} domande su ${total}.`;
+  
+  summaryView.classList.remove('hidden');
+}
+
+function playWordSound() {
+  // In una implementazione reale userebbe la sintesi vocale
+  alert(`La parola tedesca è: ${currentWord.tedesco}`);
+}
+
+// Event Listeners
+quizTypes.forEach(type => {
+  type.addEventListener('click', () => {
+    quizType = type.dataset.quizType;
+    menuView.classList.add('hidden');
+    quizView.classList.remove('hidden');
+    resetQuiz();
+  });
+});
+
+flashcard.addEventListener('click', () => {
+  flashcard.classList.toggle('flipped');
+});
+
+nextFlashcard.addEventListener('click', nextWord);
+nextMc.addEventListener('click', nextWord);
+nextWriting.addEventListener('click', nextWord);
+nextListening.addEventListener('click', nextWord);
+
+checkAnswer.addEventListener('click', () => {
+  const userAnswer = writingAnswer.value.toLowerCase().trim();
+  const correctAnswer = currentWord.tedesco.toLowerCase();
+  const isCorrect = userAnswer === correctAnswer;
+  
+  total++;
+  
+  if (isCorrect) {
+    score++;
+    writingFeedback.textContent = 'Corretto!';
+    writingFeedback.className = 'feedback correct';
+  } else {
+    writingFeedback.textContent = `Errato. La risposta corretta è "${currentWord.tedesco}".`;
+    writingFeedback.className = 'feedback incorrect';
+  }
+  
+  writingFeedback.classList.remove('hidden');
+  writingAnswer.disabled = true;
+  checkAnswer.classList.add('hidden');
+  nextWriting.classList.remove('hidden');
+  showNextButton = true;
+  updateProgress();
+});
+
+playWord.addEventListener('click', playWordSound);
+
+continueButton.addEventListener('click', resetQuiz);
+
+menuButton.addEventListener('click', () => {
+  quizView.classList.add('hidden');
+  menuView.classList.remove('hidden');
+  quizType = null;
+});
+
+backToMenu.addEventListener('click', () => {
+  quizView.classList.add('hidden');
+  menuView.classList.remove('hidden');
+  quizType = null;
+});
   </script>
 </body>
 </html>
