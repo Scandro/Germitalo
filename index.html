@@ -1,0 +1,407 @@
+import React, { useState, useEffect } from 'react';
+
+const WordLearningApp = () => {
+  const [view, setView] = useState('menu');
+  const [quizType, setQuizType] = useState(null);
+  const [currentWord, setCurrentWord] = useState(null);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [options, setOptions] = useState([]);
+  const [score, setScore] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+  const [answer, setAnswer] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [showNextButton, setShowNextButton] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  
+  // Esempio di dataset ridotto per la demo
+  const words = [
+    { tedesco: 'der', italiano: 'il' },
+    { tedesco: 'die', italiano: 'la' },
+    { tedesco: 'und', italiano: 'e' },
+    { tedesco: 'in', italiano: 'in' },
+    { tedesco: 'zu', italiano: 'a' },
+    { tedesco: 'nicht', italiano: 'non' },
+    { tedesco: 'ist', italiano: 'è' },
+    { tedesco: 'du', italiano: 'tu' },
+    { tedesco: 'ich', italiano: 'io' },
+    { tedesco: 'mit', italiano: 'con' }
+  ];
+  
+  useEffect(() => {
+    if (quizType) {
+      resetQuiz();
+    }
+  }, [quizType]);
+  
+  const resetQuiz = () => {
+    setCurrentWord(words[0]);
+    setIsFlipped(false);
+    setOptions(generateOptions(words[0]));
+    setScore(0);
+    setTotal(0);
+    setFeedback(null);
+    setAnswer('');
+    setProgress(0);
+    setShowNextButton(false);
+    setShowSummary(false);
+    setView('quiz');
+  };
+  
+  const generateOptions = (word) => {
+    const options = [word.italiano];
+    
+    while (options.length < 4) {
+      const randomIndex = Math.floor(Math.random() * words.length);
+      const randomWord = words[randomIndex].italiano;
+      
+      if (!options.includes(randomWord)) {
+        options.push(randomWord);
+      }
+    }
+    
+    return shuffleArray([...options]);
+  };
+  
+  const shuffleArray = (array) => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  };
+  
+  const handleOptionClick = (option) => {
+    const isCorrect = option === currentWord.italiano;
+    setTotal(prev => prev + 1);
+    
+    if (isCorrect) {
+      setScore(prev => prev + 1);
+    }
+    
+    setOptions(options.map(opt => ({
+      text: opt,
+      selected: opt === option,
+      correct: opt === currentWord.italiano
+    })));
+    
+    setShowNextButton(true);
+  };
+  
+  const handleCheckAnswer = () => {
+    const isCorrect = answer.toLowerCase().trim() === currentWord.tedesco.toLowerCase();
+    setTotal(prev => prev + 1);
+    
+    if (isCorrect) {
+      setScore(prev => prev + 1);
+      setFeedback({ text: 'Corretto!', type: 'correct' });
+    } else {
+      setFeedback({ 
+        text: `Errato. La risposta corretta è "${currentWord.tedesco}".`, 
+        type: 'incorrect' 
+      });
+    }
+    
+    setShowNextButton(true);
+  };
+  
+  const nextWord = () => {
+    const newProgress = progress + 1;
+    
+    if (newProgress >= 10) {
+      setShowSummary(true);
+      return;
+    }
+    
+    setProgress(newProgress);
+    setCurrentWord(words[newProgress % words.length]);
+    setIsFlipped(false);
+    setOptions(generateOptions(words[newProgress % words.length]));
+    setFeedback(null);
+    setAnswer('');
+    setShowNextButton(false);
+  };
+  
+  const playWord = () => {
+    // In una implementazione reale userebbe la sintesi vocale
+    alert(`La parola tedesca è: ${currentWord.tedesco}`);
+  };
+  
+  const handleBackToMenu = () => {
+    setView('menu');
+    setQuizType(null);
+  };
+  
+  // Rendering dei diversi tipi di quiz
+  const renderFlashcard = () => (
+    <div>
+      <div 
+        className={`bg-white rounded-lg shadow-lg w-full h-64 cursor-pointer relative ${isFlipped ? 'transform-style-3d' : ''}`}
+        onClick={() => setIsFlipped(!isFlipped)}
+      >
+        {!isFlipped ? (
+          <div className="bg-blue-500 text-white rounded-lg flex flex-col items-center justify-center h-full p-6">
+            <div className="text-4xl font-bold mb-4">{currentWord.tedesco}</div>
+            <div className="text-sm opacity-80">Tocca per vedere la traduzione</div>
+          </div>
+        ) : (
+          <div className="bg-yellow-300 rounded-lg flex flex-col items-center justify-center h-full p-6">
+            <div className="text-4xl font-bold mb-4">{currentWord.italiano}</div>
+            <div className="text-sm opacity-80">Tocca per tornare alla parola tedesca</div>
+          </div>
+        )}
+      </div>
+      <div className="mt-6">
+        <button 
+          className="bg-blue-500 text-white px-6 py-2 rounded-md shadow-md"
+          onClick={nextWord}
+        >
+          Prossima parola
+        </button>
+      </div>
+    </div>
+  );
+  
+  const renderMultipleChoice = () => (
+    <div>
+      <h3 className="text-xl mb-4">Qual è la traduzione di "{currentWord.tedesco}"?</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Array.isArray(options) && options.map ? (
+          options.map((option, index) => (
+            <button
+              key={index}
+              onClick={() => !showNextButton && handleOptionClick(option)}
+              className={`p-3 rounded-lg border-2 border-blue-500 ${
+                showNextButton && option === currentWord.italiano
+                  ? 'bg-green-500 text-white border-green-500'
+                  : showNextButton && option === (options.find(o => o.selected)?.text || '')
+                  ? 'bg-red-500 text-white border-red-500'
+                  : 'hover:bg-blue-500 hover:text-white'
+              }`}
+            >
+              {typeof option === 'string' ? option : option.text}
+            </button>
+          ))
+        ) : (
+          <div>Caricamento opzioni...</div>
+        )}
+      </div>
+      {showNextButton && (
+        <div className="mt-6">
+          <button 
+            className="bg-blue-500 text-white px-6 py-2 rounded-md shadow-md"
+            onClick={nextWord}
+          >
+            Prossima parola
+          </button>
+        </div>
+      )}
+    </div>
+  );
+  
+  const renderWritingQuiz = () => (
+    <div>
+      <h3 className="text-xl mb-4">Scrivi la traduzione tedesca di "{currentWord.italiano}":</h3>
+      <input
+        type="text"
+        value={answer}
+        onChange={(e) => setAnswer(e.target.value)}
+        placeholder="Scrivi qui la tua risposta..."
+        className="w-full p-3 border-2 border-blue-500 rounded-lg mb-4"
+        disabled={showNextButton}
+      />
+      {!showNextButton ? (
+        <button
+          onClick={handleCheckAnswer}
+          className="bg-blue-500 text-white px-6 py-2 rounded-md shadow-md"
+        >
+          Verifica
+        </button>
+      ) : (
+        <div className={`p-3 rounded-lg mb-4 ${feedback?.type === 'correct' ? 'bg-green-500' : 'bg-red-500'} text-white`}>
+          {feedback?.text}
+        </div>
+      )}
+      {showNextButton && (
+        <button 
+          className="bg-blue-500 text-white px-6 py-2 rounded-md shadow-md"
+          onClick={nextWord}
+        >
+          Prossima parola
+        </button>
+      )}
+    </div>
+  );
+  
+  const renderListeningQuiz = () => (
+    <div>
+      <div className="flex justify-center mb-6">
+        <button
+          onClick={playWord}
+          className="w-16 h-16 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </button>
+      </div>
+      <h3 className="text-xl mb-4">Qual è la traduzione della parola che hai ascoltato?</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Array.isArray(options) && options.map ? (
+          options.map((option, index) => (
+            <button
+              key={index}
+              onClick={() => !showNextButton && handleOptionClick(option)}
+              className={`p-3 rounded-lg border-2 border-blue-500 ${
+                showNextButton && option === currentWord.italiano
+                  ? 'bg-green-500 text-white border-green-500'
+                  : showNextButton && option === (options.find(o => o.selected)?.text || '')
+                  ? 'bg-red-500 text-white border-red-500'
+                  : 'hover:bg-blue-500 hover:text-white'
+              }`}
+            >
+              {typeof option === 'string' ? option : option.text}
+            </button>
+          ))
+        ) : (
+          <div>Caricamento opzioni...</div>
+        )}
+      </div>
+      {showNextButton && (
+        <div className="mt-6">
+          <button 
+            className="bg-blue-500 text-white px-6 py-2 rounded-md shadow-md"
+            onClick={nextWord}
+          >
+            Prossima parola
+          </button>
+        </div>
+      )}
+    </div>
+  );
+  
+  const renderSummary = () => {
+    const percentage = Math.round((score / total) * 100) || 0;
+    
+    return (
+      <div className="text-center py-8">
+        <h2 className="text-2xl font-bold mb-6">Riepilogo Quiz</h2>
+        <div className="text-5xl font-bold text-blue-500 mb-4">{percentage}%</div>
+        <p className="mb-8">Hai risposto correttamente a {score} domande su {total}.</p>
+        <div className="space-y-4">
+          <button 
+            className="bg-blue-500 text-white px-6 py-2 rounded-md shadow-md w-full"
+            onClick={resetQuiz}
+          >
+            Continua con nuove parole
+          </button>
+          <button 
+            className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md shadow-md w-full"
+            onClick={handleBackToMenu}
+          >
+            Torna al menu
+          </button>
+        </div>
+      </div>
+    );
+  };
+  
+  const renderQuiz = () => {
+    if (showSummary) {
+      return renderSummary();
+    }
+    
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-center mb-2">
+            {quizType === 'flashcard' ? 'Quiz Flashcard' : 
+             quizType === 'multiple-choice' ? 'Quiz a Scelta Multipla' :
+             quizType === 'writing' ? 'Quiz di Scrittura' : 'Quiz di Ascolto'}
+          </h2>
+          
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+            <div 
+              className="h-full bg-red-500 transition-all duration-300" 
+              style={{ width: `${(progress / 10) * 100}%` }}
+            ></div>
+          </div>
+          
+          <p className="text-sm text-center">
+            Parola {progress + 1} di 10 - Punteggio: {score}/{total}
+          </p>
+        </div>
+        
+        {quizType === 'flashcard' && renderFlashcard()}
+        {quizType === 'multiple-choice' && renderMultipleChoice()}
+        {quizType === 'writing' && renderWritingQuiz()}
+        {quizType === 'listening' && renderListeningQuiz()}
+        
+        <div className="mt-6 text-center">
+          <button 
+            className="text-gray-600 underline"
+            onClick={handleBackToMenu}
+          >
+            Torna alla selezione
+          </button>
+        </div>
+      </div>
+    );
+  };
+  
+  const renderMenu = () => (
+    <div>
+      <h2 className="text-xl font-bold text-center mb-6">Scegli un tipo di quiz</h2>
+      <div className="grid grid-cols-2 gap-4">
+        <div 
+          className="bg-white rounded-lg shadow-lg p-4 cursor-pointer hover:translate-y-px transition-transform"
+          onClick={() => setQuizType('flashcard')}
+        >
+          <h3 className="text-blue-500 font-bold mb-2">Flashcard</h3>
+          <p className="text-sm">Tocca per vedere la traduzione</p>
+        </div>
+        <div 
+          className="bg-white rounded-lg shadow-lg p-4 cursor-pointer hover:translate-y-px transition-transform"
+          onClick={() => setQuizType('multiple-choice')}
+        >
+          <h3 className="text-blue-500 font-bold mb-2">Scelta Multipla</h3>
+          <p className="text-sm">Scegli la traduzione corretta</p>
+        </div>
+        <div 
+          className="bg-white rounded-lg shadow-lg p-4 cursor-pointer hover:translate-y-px transition-transform"
+          onClick={() => setQuizType('writing')}
+        >
+          <h3 className="text-blue-500 font-bold mb-2">Scrittura</h3>
+          <p className="text-sm">Scrivi la traduzione della parola</p>
+        </div>
+        <div 
+          className="bg-white rounded-lg shadow-lg p-4 cursor-pointer hover:translate-y-px transition-transform"
+          onClick={() => setQuizType('listening')}
+        >
+          <h3 className="text-blue-500 font-bold mb-2">Ascolto</h3>
+          <p className="text-sm">Ascolta la parola e indovina</p>
+        </div>
+      </div>
+    </div>
+  );
+  
+  return (
+    <div className="bg-gray-100 min-h-screen">
+      <header className="bg-gradient-to-r from-blue-500 to-blue-700 text-white text-center py-8">
+        <h1 className="text-2xl font-bold">1000 Parole Tedesche</h1>
+        <p>Impara le parole tedesche più utilizzate</p>
+      </header>
+      
+      <main className="max-w-lg mx-auto p-4">
+        {view === 'menu' ? renderMenu() : renderQuiz()}
+      </main>
+      
+      <footer className="bg-gradient-to-r from-blue-500 to-blue-700 text-white text-center py-4 mt-8">
+        <p>&copy; 2025 1000 Parole Tedesche</p>
+      </footer>
+    </div>
+  );
+};
+
+export default WordLearningApp;
