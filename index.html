@@ -1556,6 +1556,7 @@ function resetQuiz() {
   }
 }
 
+// Funzione nextWord modificata per risolvere il problema dell'animazione della flashcard
 function nextWord() {
   progress++;
   
@@ -1564,25 +1565,56 @@ function nextWord() {
     return;
   }
   
-  currentWord = shuffledWords[progress];
-  options = generateOptions(currentWord);
-  showNextButton = false;
-  
-  // Aggiorna UI
-  updateProgress();
-  flashcard.classList.remove('flipped');
-  frontWord.textContent = currentWord.tedesco;
-  backWord.textContent = currentWord.italiano;
-  mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
-  renderMultipleChoiceOptions();
-  writingQuestion.textContent = `Scrivi la traduzione tedesca di "${currentWord.italiano}":`;
-  writingAnswer.value = '';
-  writingAnswer.disabled = false;
-  writingFeedback.classList.add('hidden');
-  checkAnswer.classList.remove('hidden');
-  nextMc.classList.add('hidden');
-  nextWriting.classList.add('hidden');
-  nextListening.classList.add('hidden');
+  // Verifica se la carta è girata prima di cambiare i contenuti
+  if (flashcard.classList.contains('flipped')) {
+    // Primo passo: rimuovi la classe 'flipped' per avviare l'animazione di ritorno
+    flashcard.classList.remove('flipped');
+    
+    // Aspetta che l'animazione di flip sia completata prima di cambiare i contenuti
+    setTimeout(() => {
+      // Aggiorna la parola corrente e le opzioni
+      currentWord = shuffledWords[progress];
+      options = generateOptions(currentWord);
+      showNextButton = false;
+      
+      // Aggiorna il contenuto della flashcard
+      frontWord.textContent = currentWord.tedesco;
+      backWord.textContent = currentWord.italiano;
+      
+      // Aggiorna gli altri elementi UI
+      updateProgress();
+      mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
+      renderMultipleChoiceOptions();
+      writingQuestion.textContent = `Scrivi la traduzione tedesca di "${currentWord.italiano}":`;
+      writingAnswer.value = '';
+      writingAnswer.disabled = false;
+      writingFeedback.classList.add('hidden');
+      checkAnswer.classList.remove('hidden');
+      nextMc.classList.add('hidden');
+      nextWriting.classList.add('hidden');
+      nextListening.classList.add('hidden');
+    }, 600); // Durata dell'animazione di flip è 0.6s (600ms)
+  } else {
+    // Se la carta non è girata, esegui il comportamento normale
+    currentWord = shuffledWords[progress];
+    options = generateOptions(currentWord);
+    showNextButton = false;
+    
+    // Aggiorna UI
+    updateProgress();
+    frontWord.textContent = currentWord.tedesco;
+    backWord.textContent = currentWord.italiano;
+    mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
+    renderMultipleChoiceOptions();
+    writingQuestion.textContent = `Scrivi la traduzione tedesca di "${currentWord.italiano}":`;
+    writingAnswer.value = '';
+    writingAnswer.disabled = false;
+    writingFeedback.classList.add('hidden');
+    checkAnswer.classList.remove('hidden');
+    nextMc.classList.add('hidden');
+    nextWriting.classList.add('hidden');
+    nextListening.classList.add('hidden');
+  }
 }
 
 function renderMultipleChoiceOptions() {
