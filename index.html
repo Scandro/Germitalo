@@ -1437,6 +1437,7 @@
     let total = 0;
     let progress = 0;
     let showNextButton = false;
+    let shuffledWords = [];
     
     // Elementi del DOM
     const menuView = document.getElementById('menu-view');
@@ -1482,19 +1483,22 @@
     }
     
     function generateOptions(word) {
-      const options = [word.italiano];
-      
-      while (options.length < 4) {
-        const randomIndex = Math.floor(Math.random() * words.length);
-        const randomWord = words[randomIndex].italiano;
-        
-        if (!options.includes(randomWord)) {
-          options.push(randomWord);
-        }
-      }
-      
-      return shuffleArray(options);
+  const options = [word.italiano];
+  
+  // Crea una copia dell'array di parole per selezionare opzioni casuali
+  const wordsCopy = [...words];
+  
+  while (options.length < 4) {
+    const randomIndex = Math.floor(Math.random() * wordsCopy.length);
+    const randomWord = wordsCopy[randomIndex].italiano;
+    
+    if (!options.includes(randomWord)) {
+      options.push(randomWord);
     }
+  }
+  
+  return shuffleArray(options);
+}
     
     function updateProgress() {
       progressFill.style.width = `${(progress / 10) * 100}%`;
@@ -1502,81 +1506,85 @@
     }
     
     function resetQuiz() {
-      currentWord = words[0];
-      options = generateOptions(currentWord);
-      score = 0;
-      total = 0;
-      progress = 0;
-      showNextButton = false;
+  // Mescola tutte le parole all'inizio del quiz
+  shuffledWords = shuffleArray([...words]);
+  
+  currentWord = shuffledWords[0];
+  options = generateOptions(currentWord);
+  score = 0;
+  total = 0;
+  progress = 0;
+  showNextButton = false;
       
-      // Aggiorna UI
-      updateProgress();
-      flashcard.classList.remove('flipped');
-      frontWord.textContent = currentWord.tedesco;
-      backWord.textContent = currentWord.italiano;
-      mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
-      renderMultipleChoiceOptions();
-      writingQuestion.textContent = `Scrivi la traduzione tedesca di "${currentWord.italiano}":`;
-      writingAnswer.value = '';
-      writingAnswer.disabled = false;
-      writingFeedback.classList.add('hidden');
-      checkAnswer.classList.remove('hidden');
-      nextMc.classList.add('hidden');
-      nextWriting.classList.add('hidden');
-      nextListening.classList.add('hidden');
+       // Aggiorna UI
+  updateProgress();
+  flashcard.classList.remove('flipped');
+  frontWord.textContent = currentWord.tedesco;
+  backWord.textContent = currentWord.italiano;
+  mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
+  renderMultipleChoiceOptions();
+  writingQuestion.textContent = `Scrivi la traduzione tedesca di "${currentWord.italiano}":`;
+  writingAnswer.value = '';
+  writingAnswer.disabled = false;
+  writingFeedback.classList.add('hidden');
+  checkAnswer.classList.remove('hidden');
+  nextMc.classList.add('hidden');
+  nextWriting.classList.add('hidden');
+  nextListening.classList.add('hidden');
       
       // Nascondi summary e mostra quiz appropriato
-      summaryView.classList.add('hidden');
-      flashcardQuiz.classList.add('hidden');
-      multipleChoiceQuiz.classList.add('hidden');
-      writingQuiz.classList.add('hidden');
-      listeningQuiz.classList.add('hidden');
+  summaryView.classList.add('hidden');
+  flashcardQuiz.classList.add('hidden');
+  multipleChoiceQuiz.classList.add('hidden');
+  writingQuiz.classList.add('hidden');
+  listeningQuiz.classList.add('hidden');
       
       // Mostra il quiz corretto
-      if (quizType === 'flashcard') {
-        flashcardQuiz.classList.remove('hidden');
-        quizTitle.textContent = 'Quiz Flashcard';
-      } else if (quizType === 'multiple-choice') {
-        multipleChoiceQuiz.classList.remove('hidden');
-        quizTitle.textContent = 'Quiz a Scelta Multipla';
-      } else if (quizType === 'writing') {
-        writingQuiz.classList.remove('hidden');
-        quizTitle.textContent = 'Quiz di Scrittura';
-      } else if (quizType === 'listening') {
-        listeningQuiz.classList.remove('hidden');
-        quizTitle.textContent = 'Quiz di Ascolto';
-        renderListeningOptions();
-      }
-    }
+  if (quizType === 'flashcard') {
+    flashcardQuiz.classList.remove('hidden');
+    quizTitle.textContent = 'Quiz Flashcard';
+  } else if (quizType === 'multiple-choice') {
+    multipleChoiceQuiz.classList.remove('hidden');
+    quizTitle.textContent = 'Quiz a Scelta Multipla';
+  } else if (quizType === 'writing') {
+    writingQuiz.classList.remove('hidden');
+    quizTitle.textContent = 'Quiz di Scrittura';
+  } else if (quizType === 'listening') {
+    listeningQuiz.classList.remove('hidden');
+    quizTitle.textContent = 'Quiz di Ascolto';
+    renderListeningOptions();
+  }
+}
     
-    function nextWord() {
-      progress++;
+    // Modifica la funzione nextWord per usare l'array mescolato
+function nextWord() {
+  progress++;
+  
+  if (progress >= 10) {
+    showSummary();
+    return;
+  }
+  
+  currentWord = shuffledWords[progress];
+  options = generateOptions(currentWord);
+  showNextButton = false;
       
-      if (progress >= 10) {
-        showSummary();
-        return;
-      }
-      
-      currentWord = words[progress % words.length];
-      options = generateOptions(currentWord);
-      showNextButton = false;
-      
-      // Aggiorna UI
-      updateProgress();
-      flashcard.classList.remove('flipped');
-      frontWord.textContent = currentWord.tedesco;
-      backWord.textContent = currentWord.italiano;
-      mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
-      renderMultipleChoiceOptions();
-      writingQuestion.textContent = `Scrivi la traduzione tedesca di "${currentWord.italiano}":`;
-      writingAnswer.value = '';
-      writingAnswer.disabled = false;
-      writingFeedback.classList.add('hidden');
-      checkAnswer.classList.remove('hidden');
-      nextMc.classList.add('hidden');
-      nextWriting.classList.add('hidden');
-      nextListening.classList.add('hidden');
-    }
+     // Aggiorna UI
+  updateProgress();
+  flashcard.classList.remove('flipped');
+  frontWord.textContent = currentWord.tedesco;
+  backWord.textContent = currentWord.italiano;
+  mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
+  renderMultipleChoiceOptions();
+  writingQuestion.textContent = `Scrivi la traduzione tedesca di "${currentWord.italiano}":`;
+  writingAnswer.value = '';
+  writingAnswer.disabled = false;
+  writingFeedback.classList.add('hidden');
+  checkAnswer.classList.remove('hidden');
+  nextMc.classList.add('hidden');
+  nextWriting.classList.add('hidden');
+  nextListening.classList.add('hidden');
+}
     
     function renderMultipleChoiceOptions() {
       mcOptions.innerHTML = '';
