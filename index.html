@@ -137,6 +137,7 @@
       padding: 1.5rem;
       backface-visibility: hidden;
       border-radius: 0.5rem;
+      overflow: auto; /* Permette lo scrolling se necessario */
     }
     
     .flashcard-front {
@@ -153,6 +154,24 @@
       font-size: 2.25rem;
       font-weight: bold;
       margin-bottom: 1rem;
+      /* Aggiunte per gestire le parole lunghe */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      text-align: center;
+      max-width: 100%;
+      padding: 0 0.5rem;
+    }
+    
+    /* Ridimensiona automaticamente le parole molto lunghe */
+    @media (min-width: 320px) {
+      .word.long-word {
+        font-size: 1.75rem;
+      }
+      
+      .word.very-long-word {
+        font-size: 1.5rem;
+      }
     }
     
     .hint {
@@ -1505,6 +1524,32 @@ function updateProgress() {
   status.textContent = `Parola ${progress + 1} di 10 - Punteggio: ${score}/${total}`;
 }
 
+// Nuova funzione per regolare la dimensione del testo in base alla lunghezza della parola
+function adjustWordSize() {
+  // Controlla la lunghezza delle parole e aggiunge classi appropriate
+  const frontWordText = frontWord.textContent;
+  const backWordText = backWord.textContent;
+  
+  // Rimuovi le classi esistenti
+  frontWord.classList.remove('long-word', 'very-long-word');
+  backWord.classList.remove('long-word', 'very-long-word');
+  
+  // Aggiungi classi in base alla lunghezza
+  if (frontWordText.length > 10) {
+    frontWord.classList.add('long-word');
+  }
+  if (frontWordText.length > 15) {
+    frontWord.classList.add('very-long-word');
+  }
+  
+  if (backWordText.length > 10) {
+    backWord.classList.add('long-word');
+  }
+  if (backWordText.length > 15) {
+    backWord.classList.add('very-long-word');
+  }
+}
+
 function resetQuiz() {
   // Mescola tutte le parole all'inizio del quiz
   shuffledWords = shuffleArray([...words]);
@@ -1521,6 +1566,10 @@ function resetQuiz() {
   flashcard.classList.remove('flipped');
   frontWord.textContent = currentWord.tedesco;
   backWord.textContent = currentWord.italiano;
+  
+  // Chiamata alla nuova funzione per regolare la dimensione del testo
+  adjustWordSize();
+  
   mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
   renderMultipleChoiceOptions();
   writingQuestion.textContent = `Scrivi la traduzione tedesca di "${currentWord.italiano}":`;
@@ -1581,6 +1630,9 @@ function nextWord() {
       frontWord.textContent = currentWord.tedesco;
       backWord.textContent = currentWord.italiano;
       
+      // Chiamata alla nuova funzione per regolare la dimensione del testo
+      adjustWordSize();
+      
       // Aggiorna gli altri elementi UI
       updateProgress();
       mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
@@ -1604,6 +1656,10 @@ function nextWord() {
     updateProgress();
     frontWord.textContent = currentWord.tedesco;
     backWord.textContent = currentWord.italiano;
+    
+    // Chiamata alla nuova funzione per regolare la dimensione del testo
+    adjustWordSize();
+    
     mcQuestion.textContent = `Qual è la traduzione di "${currentWord.tedesco}"?`;
     renderMultipleChoiceOptions();
     writingQuestion.textContent = `Scrivi la traduzione tedesca di "${currentWord.italiano}":`;
@@ -1752,6 +1808,6 @@ backToMenu.addEventListener('click', () => {
   menuView.classList.remove('hidden');
   quizType = null;
 });
-  </script>
+ </script>
 </body>
 </html>
